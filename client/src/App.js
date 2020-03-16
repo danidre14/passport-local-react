@@ -1,17 +1,19 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 import { BrowserRouter as Router, Route, Link, Switch, Redirect } from "react-router-dom";
-// import { Container } from "react-bootstrap";
 
-import MiddleWare from "./Components/MiddleWare.jsx";
-import CoatedWare from "./Components/CoatedWare.jsx";
+import makeRequest from "./makeRequest";
+
+import ControlRoute from "./Components/ControlRoute.jsx";
 import SignUp from "./Components/SignUp";
 import SignIn from "./Components/SignIn";
 import UserPage from "./Components/UserPage";
+import SignOut from "./Components/SignOut.js";
 
-function Header() {
-    return (<div>            <Link to="/"> HomePage</Link> |<Link to="/signup"> Sign Up</Link> |
-        <Link to="/signin/2?rd=34&tg=2"> Sign In</Link> | <Link to="/users">Users</Link>
+function Header(props) {
+    const { username, loggedIn } = props.user;
+    return (<div>            <Link to="/"> HomePage</Link> {!loggedIn ? <>|<Link to="/signup"> Sign Up</Link> |
+        <Link to="/signin"> Sign In</Link></> : <><SignOut signOut={props.signOutUser} /> | <Link to="/users">Users Page</Link> | {username} </>}
     </div>);
 }
 function HomePage() {
@@ -22,25 +24,41 @@ function RedirectHomePage() {
     return <Redirect to='/posts/view' />
 }
 
+function checkIfLoggedIn(setUser) {
+    function fetchUser() {
+        makeRequest([`/api/users`, "get"], {}, (data) => {
+            if (data.message === "Success")
+                setUser({ loggedIn: true, username: data.username });
+        }, (message) => {
+            alert("Error: Got error");
+        })
+    }
+
+
+    fetchUser();
+}
+
 function App() {
+    const [user, setUser] = useState({ loggedIn: false, username: null });
+    function signOutUser() {
+        setUser({ loggedIn: false, username: null });
+    }
+
+    useEffect(() => {
+        checkIfLoggedIn(setUser);
+    }, []);
+
     return (
         <Router>
-            <Header />
+            <Header signOutUser={signOutUser} user={user} />
 
             <div className="pt-10 pb-3 bg-ghostwhite">
-                {/* <Container> */}
-                {/* <Route component={MiddleWare} /> */}
                 <Switch>
-                    {/* <Route path="/users" component={UserPage} />
-                    <Route path="/signup" component={SignUp} />
-                    <Route path="/signin" component={SignIn} /> */}
-                    <Route path="/users" render={(props) => <CoatedWare key={1} {...props}><UserPage {...props} /></CoatedWare>} />
-                    <Route path="/signup" render={(props) => <CoatedWare key={2} {...props}><SignUp {...props} /></CoatedWare>} />
-                    <Route path="/signin" render={(props) => <CoatedWare key={3} {...props}><SignIn {...props} /></CoatedWare>} />
+                    <ControlRoute key={1} path="/users" component={UserPage} />
+                    <ControlRoute key={2} path="/signup" component={SignUp} />
+                    <ControlRoute key={3} path="/signin" signInUser={setUser} component={SignIn} />
                     <Route path="/" component={HomePage} />
-                    {/* <Route path="/" render={(props) => <CoatedWare key={4} {...props}><HomePage /></CoatedWare>} /> */}
                 </Switch>
-                {/* </Container> */}
             </div>
         </Router>
     );

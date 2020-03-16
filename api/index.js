@@ -32,7 +32,7 @@ if (process.env.NODE_ENV !== "production") {
 router.get("/users", checkAuthenticated, (req, res) => {
     try {
         if (!req.user) return res.json({ message: "Failed" });
-        res.json(req.user.name ? { message: "Success", value: req.user.name } : { message: "Failed" });
+        res.json(req.user.name ? { message: "Success", username: req.user.name } : { message: "Failed" });
     } catch (e) {
         console.log(e.message)
         res.json({ message: "Error" });
@@ -55,7 +55,7 @@ router.post("/signin", checkNotAuthenticated, (req, res, next) => {
                 console.log("Err2", loginErr)
                 return next(loginErr);
             }
-            return res.json("Success");
+            return res.json({ message: "Success", username: user.name });
         });
     })(req, res, next);
 });

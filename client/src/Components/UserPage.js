@@ -9,29 +9,18 @@ function UserPage(props) {
     function fetchUser() {
         makeRequest([`/api/users`, "get"], {}, (data) => {
             if (data.message === "Success")
-                setUserName(data.value);
+                setUserName(data.username);
         }, (message) => {
             alert("Error: Got error");
         })
     }
 
-    function signOut() {
-        makeRequest([`/api/signout`, "delete"], {}, (data) => {
-            if (data === "Success") {
-                setUserName(false);
-                props.history.push(`/signin`)
-            }
-        }, (message) => {
-            alert("Error logging out");
-        })
-    }
 
     useEffect(() => {
         fetchUser();
     }, [])
 
-    const userMessage = userName !== false ? <><p>Welcome {userName}</p>
-        <button onClick={signOut}> Sign Out</button></> : <p>No user logged in</p>
+    const userMessage = userName !== false ? <><p>Welcome {userName}</p></> : <p>No user logged in</p>
 
     return (
         <>

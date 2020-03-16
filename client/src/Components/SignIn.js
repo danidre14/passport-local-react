@@ -11,6 +11,9 @@ function SignIn(props) {
         password: ""
     });
 
+    console.log("in signin", props);
+
+
     const doSignIn = (e) => {
         e.preventDefault();
 
@@ -22,9 +25,10 @@ function SignIn(props) {
 
         function postData() {
             makeRequest([`/api/signin/`, "post"], post, (data) => {
-                if (data === "Success")
-                    props.history.push(`/users`)
-                else
+                if (data.message === "Success") {
+                    props.signInUser({ loggedIn: true, username: data.username });
+                    props.history.push(`/users`);
+                } else
                     alert("Failed SignIn: " + data)
             }, (message) => {
                 // setError(`Cannot post blog: ${message}`);
